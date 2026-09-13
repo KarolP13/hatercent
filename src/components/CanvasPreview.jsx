@@ -22,11 +22,34 @@ function buildBottomFade(fade) {
     rgba(${r}, ${g}, ${b}, 0) 52%)`;
 }
 
+function buildFadeMask() {
+  return 'linear-gradient(to top, black 0%, black 12%, rgba(0,0,0,0.55) 32%, transparent 52%)';
+}
+
+function buildFadeTexture(texture) {
+  if (texture === 'dots') {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><circle cx='4' cy='4' r='2.4' fill='white'/></svg>`;
+    return { backgroundImage: `url("data:image/svg+xml;utf8,${svg}")`, backgroundSize: '36px 36px' };
+  }
+  if (texture === 'wave') {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='34'><g fill='none' stroke='white' stroke-width='3' stroke-linecap='round'><path d='M4 14 Q10 6 16 14'/><path d='M24 14 Q30 6 36 14'/><path d='M44 14 Q50 6 56 14'/><path d='M-6 14 Q0 6 6 14'/><path d='M14 30 Q20 22 26 30'/><path d='M34 30 Q40 22 46 30'/><path d='M54 30 Q60 22 66 30'/><path d='M-6 30 Q0 22 6 30'/></g></svg>`;
+    return { backgroundImage: `url("data:image/svg+xml;utf8,${svg}")`, backgroundSize: '60px 34px' };
+  }
+  return null;
+}
+
 function buildImageStyle(bg) {
   const totalScale = 1.04 * (bg.transform.zoom / 100);
   return {
     transform: `translate(${bg.transform.x}%, ${bg.transform.y}%) scale(${totalScale})`,
     filter: `blur(${bg.filters.blur}px) brightness(${bg.filters.brightness}%) contrast(${bg.filters.contrast}%) saturate(${bg.filters.saturate}%) grayscale(${bg.filters.grayscale}%)`,
+  };
+}
+
+function buildCutoutStyle(cutout) {
+  const totalScale = cutout.transform.zoom / 100;
+  return {
+    transform: `translate(${cutout.transform.x}%, ${cutout.transform.y}%) scale(${totalScale})`,
   };
 }
 
@@ -108,6 +131,28 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
             <div className="canvas-empty-hint">Upload a photo to get started</div>
           )}
 
+          {state.effects.frame.enabled && (
+            <div
+              className="canvas-frame-accent"
+              style={{
+                inset: `${state.effects.frame.inset}%`,
+                border: `${state.effects.frame.width}px solid ${state.effects.frame.color}`,
+                borderRadius: state.effects.frame.radius,
+              }}
+            />
+          )}
+
+          {state.cutout.image && (
+            <div className="canvas-cutout-wrap">
+              <img
+                src={state.cutout.image}
+                alt=""
+                className="canvas-cutout-img"
+                style={buildCutoutStyle(state.cutout)}
+              />
+            </div>
+          )}
+
           {state.effects.vignette.enabled && (
             <div
               className="canvas-vignette"
@@ -128,16 +173,33 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
           )}
 
           {state.background.bottomFade.enabled && (
-            <div
-              className="canvas-bottom-fade"
-              style={{ background: buildBottomFade(state.background.bottomFade) }}
-            />
+            <>
+              <div
+                className="canvas-bottom-fade"
+                style={{ background: buildBottomFade(state.background.bottomFade) }}
+              />
+              {state.background.bottomFade.texture !== 'none' && (
+                <div
+                  className="canvas-fade-texture"
+                  style={{
+                    ...buildFadeTexture(state.background.bottomFade.texture),
+                    opacity: state.background.bottomFade.textureIntensity,
+                    WebkitMaskImage: buildFadeMask(),
+                    maskImage: buildFadeMask(),
+                  }}
+                />
+              )}
+            </>
           )}
 
           {state.eyebrow.visible && state.eyebrow.content && (
             <p
               className="canvas-eyebrow"
-              style={{ color: state.eyebrow.color, fontSize: state.size.width * 0.016 }}
+              style={{
+                color: state.eyebrow.color,
+                fontSize: state.size.width * 0.016,
+                fontStyle: state.eyebrow.italic ? 'italic' : 'normal',
+              }}
             >
               {state.eyebrow.content}
             </p>
@@ -163,6 +225,19 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
                     fontSize: state.size.width * 0.045,
                     width: state.size.width * 0.09,
                     height: state.size.width * 0.09,
+                  }}
+                >
+                  &#8220;&#8221;
+                </div>
+              ) : state.quoteMark.style === 'bubble' ? (
+                <div
+                  className="quote-mark quote-mark--bubble"
+                  style={{
+                    background: state.quoteMark.badgeColor,
+                    color: state.quoteMark.badgeTextColor,
+                    fontSize: state.size.width * 0.04,
+                    padding: `${state.size.width * 0.015}px ${state.size.width * 0.035}px`,
+                    '--bubble-color': state.quoteMark.badgeColor,
                   }}
                 >
                   &#8220;&#8221;

@@ -43,11 +43,40 @@
   background: #1a1a1a;
 }
 
-.canvas-vignette,
-.canvas-noise,
-.canvas-bottom-fade {
+.canvas-frame-accent {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.canvas-cutout-wrap {
   position: absolute;
   inset: 0;
+  overflow: visible;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.canvas-cutout-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transform-origin: bottom center;
+}
+
+.canvas-vignette,
+.canvas-noise,
+.canvas-bottom-fade,
+.canvas-fade-texture {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-fade-texture {
+  mix-blend-mode: soft-light;
+  background-repeat: repeat;
 }
 
 .canvas-empty-hint {
@@ -108,6 +137,28 @@
   justify-content: center;
   border-radius: 10px;
   font-weight: 700;
+}
+
+.quote-mark--bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.quote-mark--bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 7px 0 7px;
+  border-style: solid;
+  border-top-color: var(--bubble-color, #ffffff);
+  border-left-color: transparent;
+  border-right-color: transparent;
 }
 
 .canvas-text {

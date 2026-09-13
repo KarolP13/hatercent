@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useDesignState, useDesignDispatch, FORMATS, LOGO_POSITIONS, STYLE_PRESETS, FADE_COLOR_PRESETS } from '../context/DesignContext';
+import { useDesignState, useDesignDispatch, FORMATS, LOGO_POSITIONS, STYLE_PRESETS, FADE_COLOR_PRESETS, FADE_TEXTURES, FRAME_COLOR_PRESETS } from '../context/DesignContext';
 import Section from './ui/Section';
 import Slider from './ui/Slider';
 import ColorPicker from './ui/ColorPicker';
@@ -11,12 +11,22 @@ export default function Sidebar({ previewRef }) {
   const state = useDesignState();
   const { setPath, patch } = useDesignDispatch();
   const fileInputRef = useRef(null);
+  const cutoutInputRef = useRef(null);
 
   const handleImageUpload = (file) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       setPath('background.image', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCutoutUpload = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPath('cutout.image', e.target.result);
     };
     reader.readAsDataURL(file);
   };
@@ -145,6 +155,77 @@ export default function Sidebar({ previewRef }) {
                 step={0.05}
                 onChange={(v) => setPath('background.bottomFade.intensity', v)}
               />
+              <label className="field-label">Fade Texture</label>
+              <div className="tab-row">
+                {FADE_TEXTURES.map((t) => (
+                  <button
+                    key={t}
+                    className={`tab-btn ${state.background.bottomFade.texture === t ? 'is-active' : ''}`}
+                    onClick={() => setPath('background.bottomFade.texture', t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {state.background.bottomFade.texture !== 'none' && (
+                <Slider
+                  label="Texture Intensity"
+                  value={state.background.bottomFade.textureIntensity}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  onChange={(v) => setPath('background.bottomFade.textureIntensity', v)}
+                />
+              )}
+            </>
+          )}
+        </Section>
+
+        <Section title="Subject Cutout" icon="🫥">
+          <p className="section-hint">
+            Upload a transparent PNG cutout of just your subject to let it break over the frame border below.
+          </p>
+          <div
+            className="dropzone"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              handleCutoutUpload(e.dataTransfer.files[0]);
+            }}
+            onClick={() => cutoutInputRef.current?.click()}
+          >
+            {state.cutout.image ? (
+              <img src={state.cutout.image} alt="cutout" className="dropzone__preview" />
+            ) : (
+              <span>Drop cutout PNG or click to upload</span>
+            )}
+          </div>
+          <input
+            ref={cutoutInputRef}
+            type="file"
+            accept="image/png"
+            style={{ display: 'none' }}
+            onChange={(e) => handleCutoutUpload(e.target.files[0])}
+          />
+          {state.cutout.image && (
+            <>
+              <div className="field-label-row">
+                <label className="field-label" style={{ margin: 0 }}>Reposition</label>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button
+                    className="text-link-btn"
+                    onClick={() => setPath('cutout.transform', { zoom: 100, x: 0, y: 0 })}
+                  >
+                    Recenter
+                  </button>
+                  <button className="text-link-btn" onClick={() => setPath('cutout.image', null)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <Slider label="Zoom" value={state.cutout.transform.zoom} min={50} max={250} step={1} unit="%" onChange={(v) => setPath('cutout.transform.zoom', v)} />
+              <Slider label="Move Horizontal" value={state.cutout.transform.x} min={-50} max={50} step={1} onChange={(v) => setPath('cutout.transform.x', v)} />
+              <Slider label="Move Vertical" value={state.cutout.transform.y} min={-50} max={50} step={1} onChange={(v) => setPath('cutout.transform.y', v)} />
             </>
           )}
         </Section>
@@ -210,7 +291,7 @@ export default function Sidebar({ previewRef }) {
           {state.quoteMark.enabled && (
             <>
               <div className="tab-row">
-                {['minimal', 'badge'].map((s) => (
+                {['minimal', 'badge', 'bubble'].map((s) => (
                   <button
                     key={s}
                     className={`tab-btn ${state.quoteMark.style === s ? 'is-active' : ''}`}
@@ -224,8 +305,8 @@ export default function Sidebar({ previewRef }) {
                 <ColorPicker label="Accent Color" value={state.quoteMark.color} onChange={(v) => setPath('quoteMark.color', v)} />
               ) : (
                 <>
-                  <ColorPicker label="Badge Color" value={state.quoteMark.badgeColor} onChange={(v) => setPath('quoteMark.badgeColor', v)} />
-                  <ColorPicker label="Badge Icon Color" value={state.quoteMark.badgeTextColor} onChange={(v) => setPath('quoteMark.badgeTextColor', v)} />
+                  <ColorPicker label={state.quoteMark.style === 'bubble' ? 'Bubble Color' : 'Badge Color'} value={state.quoteMark.badgeColor} onChange={(v) => setPath('quoteMark.badgeColor', v)} />
+                  <ColorPicker label="Icon Color" value={state.quoteMark.badgeTextColor} onChange={(v) => setPath('quoteMark.badgeTextColor', v)} />
                 </>
               )}
             </>
@@ -266,14 +347,24 @@ export default function Sidebar({ previewRef }) {
                 />
               </label>
               {state.eyebrow.visible && (
-                <input
-                  className="text-input"
-                  type="text"
-                  placeholder="VIA THE SHOW NAME"
-                  value={state.eyebrow.content}
-                  onChange={(e) => setPath('eyebrow.content', e.target.value)}
-                  style={{ marginBottom: 14 }}
-                />
+                <>
+                  <input
+                    className="text-input"
+                    type="text"
+                    placeholder="VIA THE SHOW NAME"
+                    value={state.eyebrow.content}
+                    onChange={(e) => setPath('eyebrow.content', e.target.value)}
+                    style={{ marginBottom: 6 }}
+                  />
+                  <label className="toggle-row">
+                    <span>Italic</span>
+                    <input
+                      type="checkbox"
+                      checked={state.eyebrow.italic}
+                      onChange={(e) => setPath('eyebrow.italic', e.target.checked)}
+                    />
+                  </label>
+                </>
               )}
 
               <label className="toggle-row">
@@ -322,6 +413,36 @@ export default function Sidebar({ previewRef }) {
         </Section>
 
         <Section title="Effects" icon="✨">
+          <label className="toggle-row">
+            <span>Frame Accent</span>
+            <input
+              type="checkbox"
+              checked={state.effects.frame.enabled}
+              onChange={(e) => setPath('effects.frame.enabled', e.target.checked)}
+            />
+          </label>
+          {state.effects.frame.enabled && (
+            <>
+              <p className="section-hint">
+                Sits behind your photo — most visible with a zoomed-out photo or a subject cutout crossing over it.
+              </p>
+              <ColorPicker label="Frame Color" value={state.effects.frame.color} onChange={(v) => setPath('effects.frame.color', v)} />
+              <div className="swatch-row">
+                {FRAME_COLOR_PRESETS.map((c) => (
+                  <button
+                    key={c}
+                    className="swatch-row__item"
+                    style={{ background: c }}
+                    onClick={() => setPath('effects.frame.color', c)}
+                  />
+                ))}
+              </div>
+              <Slider label="Frame Width" value={state.effects.frame.width} min={1} max={16} unit="px" onChange={(v) => setPath('effects.frame.width', v)} />
+              <Slider label="Inset" value={state.effects.frame.inset} min={0} max={15} unit="%" onChange={(v) => setPath('effects.frame.inset', v)} />
+              <Slider label="Corner Radius" value={state.effects.frame.radius} min={0} max={60} unit="px" onChange={(v) => setPath('effects.frame.radius', v)} />
+            </>
+          )}
+
           <label className="toggle-row">
             <span>Border</span>
             <input

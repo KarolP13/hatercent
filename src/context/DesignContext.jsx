@@ -28,9 +28,13 @@ export const FONTS = [
   'Caveat',
 ];
 
-export const QUOTE_MARK_STYLES = ['minimal', 'badge'];
+export const QUOTE_MARK_STYLES = ['minimal', 'badge', 'bubble'];
 
 export const FADE_COLOR_PRESETS = ['#000000', '#0a1a5c', '#D4A017', '#3a0d0d', '#0a2e1a'];
+
+export const FADE_TEXTURES = ['none', 'dots', 'wave'];
+
+export const FRAME_COLOR_PRESETS = ['#3ddc97', '#F5C518', '#ffffff', '#ff4d4d', '#4d9fff'];
 
 export const STYLE_PRESETS = [
   {
@@ -71,13 +75,19 @@ const defaultState = {
     image: null,
     transform: { zoom: 100, x: 0, y: 0 },
     filters: { blur: 0, brightness: 100, contrast: 100, saturate: 100, grayscale: 0 },
-    bottomFade: { enabled: true, color: '#000000', intensity: 0.85 },
+    bottomFade: { enabled: true, color: '#000000', intensity: 0.85, texture: 'none', textureIntensity: 0.35 },
+  },
+
+  cutout: {
+    image: null,
+    transform: { zoom: 100, x: 0, y: 0 },
   },
 
   eyebrow: {
     visible: false,
     content: '',
     color: '#f5f5f5',
+    italic: false,
   },
 
   quoteMark: {
@@ -119,6 +129,7 @@ const defaultState = {
 
   effects: {
     border: { enabled: false, width: 2, color: '#D4A017', radius: 0 },
+    frame: { enabled: false, color: '#3ddc97', width: 4, inset: 4, radius: 16 },
     vignette: { enabled: false, intensity: 0.5 },
     noise: { enabled: false, intensity: 0.1 },
   },
