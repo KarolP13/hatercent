@@ -285,16 +285,32 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
           </div>
 
           {state.logo.visible && (
-            <img
-              src="/assets/hatercent-logo.png"
-              alt="HaterCent"
-              className="canvas-logo"
+            <div
+              className="canvas-logo-wrap"
               style={{
                 width: state.logo.size,
-                opacity: state.logo.opacity,
+                height: state.logo.size,
                 ...LOGO_POS_STYLES[state.logo.position],
               }}
-            />
+            >
+              {state.logo.glow.enabled && (
+                <div
+                  className="canvas-logo-glow"
+                  style={{
+                    width: state.logo.glow.size,
+                    height: state.logo.glow.size,
+                    background: `radial-gradient(circle, ${state.logo.glow.color} 0%, transparent 70%)`,
+                    opacity: state.logo.glow.intensity,
+                  }}
+                />
+              )}
+              <img
+                src="/assets/hatercent-logo.png"
+                alt="HaterCent"
+                className="canvas-logo"
+                style={{ opacity: state.logo.opacity }}
+              />
+            </div>
           )}
         </div>
       </div>

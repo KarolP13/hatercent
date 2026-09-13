@@ -408,6 +408,22 @@ export default function Sidebar({ previewRef }) {
               </div>
               <Slider label="Size" value={state.logo.size} min={30} max={300} unit="px" onChange={(v) => setPath('logo.size', v)} />
               <Slider label="Opacity" value={state.logo.opacity} min={0} max={1} step={0.05} onChange={(v) => setPath('logo.opacity', v)} />
+
+              <label className="toggle-row">
+                <span>Glow</span>
+                <input
+                  type="checkbox"
+                  checked={state.logo.glow.enabled}
+                  onChange={(e) => setPath('logo.glow.enabled', e.target.checked)}
+                />
+              </label>
+              {state.logo.glow.enabled && (
+                <>
+                  <ColorPicker label="Glow Color" value={state.logo.glow.color} onChange={(v) => setPath('logo.glow.color', v)} />
+                  <Slider label="Glow Size" value={state.logo.glow.size} min={100} max={500} step={10} unit="px" onChange={(v) => setPath('logo.glow.size', v)} />
+                  <Slider label="Glow Intensity" value={state.logo.glow.intensity} min={0} max={1} step={0.05} onChange={(v) => setPath('logo.glow.intensity', v)} />
+                </>
+              )}
             </>
           )}
         </Section>

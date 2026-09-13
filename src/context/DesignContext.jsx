@@ -125,6 +125,7 @@ const defaultState = {
     position: 'top-left',
     size: 80,
     opacity: 0.85,
+    glow: { enabled: false, color: '#ffffff', size: 220, intensity: 0.5 },
   },
 
   effects: {
