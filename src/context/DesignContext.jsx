@@ -36,6 +36,10 @@ export const FADE_TEXTURES = ['none', 'dots', 'wave'];
 
 export const FRAME_COLOR_PRESETS = ['#3ddc97', '#F5C518', '#ffffff', '#ff4d4d', '#4d9fff'];
 
+export const GLOW_COLOR_PRESETS = ['#1a2ee0', '#D4A017', '#3ddc97', '#8b0000', '#ffffff'];
+
+export const CORNERS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+
 export const STYLE_PRESETS = [
   {
     name: 'Bleacher Blitz',
@@ -126,11 +130,13 @@ const defaultState = {
     size: 80,
     opacity: 0.85,
     glow: { enabled: false, color: '#ffffff', size: 220, intensity: 0.5 },
+    tagline: { visible: false, text: 'MUSIC HATE CENT', color: '#ffffff' },
   },
 
   effects: {
     border: { enabled: false, width: 2, color: '#D4A017', radius: 0 },
     frame: { enabled: false, color: '#3ddc97', width: 4, inset: 4, radius: 16 },
+    cornerGlow: { enabled: false, corner: 'bottom-right', color: '#1a2ee0', size: 110, intensity: 0.75 },
     vignette: { enabled: false, intensity: 0.5 },
     noise: { enabled: false, intensity: 0.1 },
   },

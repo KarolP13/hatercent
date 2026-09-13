@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useDesignState, useDesignDispatch, FORMATS, LOGO_POSITIONS, STYLE_PRESETS, FADE_COLOR_PRESETS, FADE_TEXTURES, FRAME_COLOR_PRESETS } from '../context/DesignContext';
+import { useDesignState, useDesignDispatch, FORMATS, LOGO_POSITIONS, STYLE_PRESETS, FADE_COLOR_PRESETS, FADE_TEXTURES, FRAME_COLOR_PRESETS, GLOW_COLOR_PRESETS, CORNERS } from '../context/DesignContext';
 import Section from './ui/Section';
 import Slider from './ui/Slider';
 import ColorPicker from './ui/ColorPicker';
@@ -424,11 +424,74 @@ export default function Sidebar({ previewRef }) {
                   <Slider label="Glow Intensity" value={state.logo.glow.intensity} min={0} max={1} step={0.05} onChange={(v) => setPath('logo.glow.intensity', v)} />
                 </>
               )}
+
+              <label className="toggle-row">
+                <span>Wordmark Tag</span>
+                <input
+                  type="checkbox"
+                  checked={state.logo.tagline.visible}
+                  onChange={(e) => setPath('logo.tagline.visible', e.target.checked)}
+                />
+              </label>
+              {state.logo.tagline.visible && (
+                <>
+                  <input
+                    className="text-input"
+                    type="text"
+                    placeholder="MUSIC HATE CENT"
+                    value={state.logo.tagline.text}
+                    onChange={(e) => setPath('logo.tagline.text', e.target.value)}
+                    style={{ marginBottom: 10 }}
+                  />
+                  <ColorPicker label="Text Color" value={state.logo.tagline.color} onChange={(v) => setPath('logo.tagline.color', v)} />
+                </>
+              )}
             </>
           )}
         </Section>
 
         <Section title="Effects" icon="✨">
+          <label className="toggle-row">
+            <span>Corner Glow</span>
+            <input
+              type="checkbox"
+              checked={state.effects.cornerGlow.enabled}
+              onChange={(e) => setPath('effects.cornerGlow.enabled', e.target.checked)}
+            />
+          </label>
+          {state.effects.cornerGlow.enabled && (
+            <>
+              <p className="section-hint">
+                A colored gradient wash radiating from one corner — great paired with the logo there.
+              </p>
+              <label className="field-label">Corner</label>
+              <div className="tab-row">
+                {CORNERS.map((c) => (
+                  <button
+                    key={c}
+                    className={`tab-btn ${state.effects.cornerGlow.corner === c ? 'is-active' : ''}`}
+                    onClick={() => setPath('effects.cornerGlow.corner', c)}
+                  >
+                    {c.replace('-', ' ')}
+                  </button>
+                ))}
+              </div>
+              <ColorPicker label="Glow Color" value={state.effects.cornerGlow.color} onChange={(v) => setPath('effects.cornerGlow.color', v)} />
+              <div className="swatch-row">
+                {GLOW_COLOR_PRESETS.map((c) => (
+                  <button
+                    key={c}
+                    className="swatch-row__item"
+                    style={{ background: c }}
+                    onClick={() => setPath('effects.cornerGlow.color', c)}
+                  />
+                ))}
+              </div>
+              <Slider label="Reach" value={state.effects.cornerGlow.size} min={40} max={160} unit="%" onChange={(v) => setPath('effects.cornerGlow.size', v)} />
+              <Slider label="Intensity" value={state.effects.cornerGlow.intensity} min={0} max={1} step={0.05} onChange={(v) => setPath('effects.cornerGlow.intensity', v)} />
+            </>
+          )}
+
           <label className="toggle-row">
             <span>Frame Accent</span>
             <input

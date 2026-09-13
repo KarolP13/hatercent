@@ -41,6 +41,10 @@ function buildFadeTexture(texture) {
 function buildImageStyle(bg) {
   const totalScale = 1.04 * (bg.transform.zoom / 100);
   return {
+    backgroundImage: `url(${bg.image})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
     transform: `translate(${bg.transform.x}%, ${bg.transform.y}%) scale(${totalScale})`,
     filter: `blur(${bg.filters.blur}px) brightness(${bg.filters.brightness}%) contrast(${bg.filters.contrast}%) saturate(${bg.filters.saturate}%) grayscale(${bg.filters.grayscale}%)`,
   };
@@ -49,8 +53,24 @@ function buildImageStyle(bg) {
 function buildCutoutStyle(cutout) {
   const totalScale = cutout.transform.zoom / 100;
   return {
+    backgroundImage: `url(${cutout.image})`,
+    backgroundSize: 'contain',
+    backgroundPosition: 'bottom center',
+    backgroundRepeat: 'no-repeat',
     transform: `translate(${cutout.transform.x}%, ${cutout.transform.y}%) scale(${totalScale})`,
   };
+}
+
+const CORNER_POS = {
+  'top-left': '0% 0%',
+  'top-right': '100% 0%',
+  'bottom-left': '0% 100%',
+  'bottom-right': '100% 100%',
+};
+
+function buildCornerGlow(glow) {
+  const { r, g, b } = hexToRgb(glow.color);
+  return `radial-gradient(circle at ${CORNER_POS[glow.corner]}, rgba(${r}, ${g}, ${b}, ${glow.intensity}) 0%, transparent ${glow.size}%)`;
 }
 
 const LOGO_POS_STYLES = {
@@ -116,12 +136,7 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
         >
           <div className="canvas-bg-wrap">
             {state.background.image ? (
-              <img
-                src={state.background.image}
-                alt=""
-                className="canvas-bg-img"
-                style={buildImageStyle(state.background)}
-              />
+              <div className="canvas-bg-img" style={buildImageStyle(state.background)} />
             ) : (
               <div className="canvas-bg-empty" />
             )}
@@ -144,13 +159,15 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
 
           {state.cutout.image && (
             <div className="canvas-cutout-wrap">
-              <img
-                src={state.cutout.image}
-                alt=""
-                className="canvas-cutout-img"
-                style={buildCutoutStyle(state.cutout)}
-              />
+              <div className="canvas-cutout-img" style={buildCutoutStyle(state.cutout)} />
             </div>
+          )}
+
+          {state.effects.cornerGlow.enabled && (
+            <div
+              className="canvas-corner-glow"
+              style={{ background: buildCornerGlow(state.effects.cornerGlow) }}
+            />
           )}
 
           {state.effects.vignette.enabled && (
@@ -285,31 +302,38 @@ const CanvasPreview = forwardRef(function CanvasPreview(_, ref) {
           </div>
 
           {state.logo.visible && (
-            <div
-              className="canvas-logo-wrap"
-              style={{
-                width: state.logo.size,
-                height: state.logo.size,
-                ...LOGO_POS_STYLES[state.logo.position],
-              }}
-            >
-              {state.logo.glow.enabled && (
+            <div className="canvas-logo-wrap" style={{ ...LOGO_POS_STYLES[state.logo.position] }}>
+              <div className="canvas-logo-icon-wrap" style={{ width: state.logo.size, height: state.logo.size }}>
+                {state.logo.glow.enabled && (
+                  <div
+                    className="canvas-logo-glow"
+                    style={{
+                      width: state.logo.glow.size,
+                      height: state.logo.glow.size,
+                      background: `radial-gradient(circle, ${state.logo.glow.color} 0%, transparent 70%)`,
+                      opacity: state.logo.glow.intensity,
+                    }}
+                  />
+                )}
                 <div
-                  className="canvas-logo-glow"
+                  className="canvas-logo"
                   style={{
-                    width: state.logo.glow.size,
-                    height: state.logo.glow.size,
-                    background: `radial-gradient(circle, ${state.logo.glow.color} 0%, transparent 70%)`,
-                    opacity: state.logo.glow.intensity,
+                    backgroundImage: `url(/assets/hatercent-logo.png)`,
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    opacity: state.logo.opacity,
                   }}
                 />
+              </div>
+              {state.logo.tagline.visible && state.logo.tagline.text && (
+                <p
+                  className="canvas-logo-tagline"
+                  style={{ color: state.logo.tagline.color, fontSize: state.logo.size * 0.16 }}
+                >
+                  {state.logo.tagline.text}
+                </p>
               )}
-              <img
-                src="/assets/hatercent-logo.png"
-                alt="HaterCent"
-                className="canvas-logo"
-                style={{ opacity: state.logo.opacity }}
-              />
             </div>
           )}
         </div>
